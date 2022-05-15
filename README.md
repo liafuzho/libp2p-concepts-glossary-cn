@@ -177,6 +177,7 @@ libp2p 提供了一个[中继协议](https://docs.libp2p.io/concepts/circuit-rel
 
 ### 流程
 下面的序列图描述了一个中继连接流程：
+
 ![](https://raw.githubusercontent.com/libp2p/specs/master/relay/circuit-v2.svg)
 
 1. 节点 A 位于 NAT 和/或防火墙之后，例如通过 [自动NAT](#自动NAT) 服务检测到。
