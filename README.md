@@ -41,7 +41,7 @@ libp2p 涵盖了很多领域，并且可能涉及不熟悉的概念和术语。�
 ### 地址
 在您可以对一个端点拨号并打开连接之前，您需要知道如何与它们取得联系。因为每种传输都可能需要自己的地址方案，libp2p 使用一种称为 `multiaddress` 或 `multiaddr`（*以下统称“多地址” -译注*） 的方案来约定并编码许多不同的地址。
 
-[addressing doc](https://docs.libp2p.io/concepts/addressing/) 更详细地介绍了工作原理，但对多地址如何工作的简单概述有助于理解拨号和监听接口。
+[寻址](#寻址) 更详细地介绍了工作原理，但对多地址如何工作的简单概述有助于理解拨号和监听接口。
 
 下面是 TCP/IP 传输的多地址示例：
 
@@ -51,7 +51,7 @@ libp2p 涵盖了很多领域，并且可能涉及不熟悉的概念和术语。�
 
 这等效于更熟悉的 `7.7.7.7:6543` 结构，但它的优点是对协议有了更明确的描述。有了多地址，您一眼就能看出 `7.7.7.7` 地址属于 IPv4 协议，`6543` 属于 TCP。
 
-有关更复杂的示例，请参阅 [Addressing](https://docs.libp2p.io/concepts/addressing/)。
+有关更复杂的示例，请参阅 [对址](#寻址)。
 
 拨号和监听都可以处理多地址。监听时提供您想监听的地址，拨号时提供您要拨号的地址。
 
@@ -63,7 +63,7 @@ libp2p 涵盖了很多领域，并且可能涉及不熟悉的概念和术语。�
 /ip4/1.2.3.4/tcp/4321/p2p/QmcEPrat8ShnCph8WjkREzt5CPXF2RwhYxYBALDcLC1iV6
 ```
 
-`/p2p/QmcEPrat8ShnCph8WjkREzt5CPXF2RwhYxYBALDcLC1iV6` 中使用其公钥的哈希【hash】来唯一的标识一个远程端点。有关更多信息，请参阅 [Peer Identity](https://docs.libp2p.io/concepts/peer-id/)。
+`/p2p/QmcEPrat8ShnCph8WjkREzt5CPXF2RwhYxYBALDcLC1iV6` 中使用其公钥的哈希【hash】来唯一的标识一个远程端点。有关更多信息，请参阅 [PeerId](#PeerId)。
 
 >启用对等端点路由后，您可以仅使用对等端点的 `PeerId` 拨号，而无需事先知道它们的传输地址。
 
@@ -153,7 +153,7 @@ libp2p 提供了一个[中继协议](https://docs.libp2p.io/concepts/circuit-rel
 今天有两个版本的中继连接协议，[v1](https://github.com/libp2p/specs/blob/master/relay/circuit-v1.md) 和 [v2](https://github.com/libp2p/specs/blob/master/relay/circuit-v2.md)。我们建议使用后者而不是前者。有关两者的详细比较，请参阅[中继连接 v2 版规范](https://github.com/libp2p/specs/blob/master/relay/circuit-v2.md#introduction)。如果没有明确说明，本文档将描述中继连接 v2 版协议。
 
 ### 中继地址
-一个中继连接使用[多地址](https://docs.libp2p.io/reference/glossary/#mulitaddress)识别，该多地址包括了正在通信的 `PeerId`，也包括了中继端点自身 `PeerId`。
+一个中继连接使用[多地址](#multiaddr)识别，该多地址包括了正在通信的 `PeerId`，也包括了中继端点自身 `PeerId`。
 
 假设我有一个 `PeerId` 为 QmAlice 的对等端点。我想把我的地址告诉我的朋友 QmBob，但我的 NAT 不允许任何人直接对我拨号。
 
@@ -177,7 +177,6 @@ libp2p 提供了一个[中继协议](https://docs.libp2p.io/concepts/circuit-rel
 
 ### 流程
 下面的序列图描述了一个中继连接流程：
-
 ![](https://raw.githubusercontent.com/libp2p/specs/master/relay/circuit-v2.svg)
 
 1. 节点 A 位于 NAT 和/或防火墙之后，例如通过 [自动NAT](#自动NAT) 服务检测到。
@@ -211,7 +210,7 @@ libp2p 协议具有唯一的字符串标识符，在首次打开连接时用于[
 >虽然从技术上讲，libp2p 可以接受任何字符串作为有效的协议 id，但使用带有版本号的路径结构既对开发人员友好，也可以更轻松地[按版本进行匹配](#)。
 
 #### 处理函数
-为了接受连接，libp2p 应用程序将使用它们的协议 ID 与 [switch](https://docs.libp2p.io/reference/glossary/#switch)（又名“swarm”）或更高级别的接口（如 [go 的 Host 接口](https://github.com/libp2p/go-libp2p-core/blob/master/host/host.go)）注册协议的处理函数。
+为了接受连接，libp2p 应用程序将使用它们的协议 ID 与 [switch](#Switch)（又名“swarm”）或更高级别的接口（如 [go 的 Host 接口](https://github.com/libp2p/go-libp2p-core/blob/master/host/host.go)）注册协议的处理函数。
 
 当一个被注册的协议 ID 标记的信息流传入时，将调用处理函数。如果您使用[匹配函数](https://docs.libp2p.io/concepts/protocols/#using-a-match-function)注册处理函数，则可以选择是否接受一个对协议 ID 不精确的字符串匹配，例如，匹配协议的[语义版本](https://docs.libp2p.io/concepts/protocols/#match-using-semver)。
 
@@ -290,7 +289,7 @@ identify 协议通过使用上表中的 identify 协议 ID 与对等端点建立
 
 当远程对等端点打开新的流时，他们将填写一个 identify  [protobuf](https://github.com/libp2p/go-libp2p/blob/master/p2p/protocol/identify/pb/identify.proto) 消息，其中包含有关他们自己的信息，例如他们的公钥和 `PeerId`。
 
-重要的是，identify 消息包含一个 `observedAddr` 字段，该字段包含对等端点观察到请求进入的[多地址](https://docs.libp2p.io/reference/glossary/#multiaddr)。这有助于对等端点确定他们的 NAT 状态，因为它允许他们查看其他对等端点观察到的公共地址，并将其与自己的观察到的网络情况进行比较。
+重要的是，identify 消息包含一个 `observedAddr` 字段，该字段包含对等端点观察到请求进入的[多地址](#multiaddr)。这有助于对等端点确定他们的 NAT 状态，因为它允许他们查看其他对等端点观察到的公共地址，并将其与自己的观察到的网络情况进行比较。
 
 ##### identify/push【识别/推送】
 | 协议 ID | spec & 实现 |
@@ -340,10 +339,10 @@ libp2p 使用 DHT 作为其对等路由和内容路由功能的基础。
 
 [PeerId 规范](https://github.com/libp2p/specs/pull/100) 详细介绍了用于 libp2p 公钥的字节格式，以及如何对密钥进行哈希以生成有效的 `PeerId`。
 
-PeerIds 使用[多重哈希](https://docs.libp2p.io/reference/glossary/#multihash)（multihashes）格式编码，该格式向哈希本身添加了一个小的头，用于标识生成它的哈希算法。
+PeerIds 使用[多重哈希](#Multihash)（multihashes）格式编码，该格式向哈希本身添加了一个小的头，用于标识生成它的哈希算法。
 
 ### Peer Ids 如何表示为字符串？
-PeerIds 是[多重哈希](https://docs.libp2p.io/reference/glossary/#multihash)，被定义为紧凑的二进制格式。
+PeerIds 是[多重哈希](#Multihash)，被定义为紧凑的二进制格式。
 
 很常见的情况是，使用与[比特币相同的字母表](https://en.bitcoinwiki.org/wiki/Base58#Alphabet_Base58)，将多重哈希编码到 [base 58](https://en.wikipedia.org/wiki/Base58) 中。
 
@@ -377,7 +376,7 @@ PeerIds 是[多重哈希](https://docs.libp2p.io/reference/glossary/#multihash)�
 ### 对等端点信息
 另一种与对等端点标识相关的常见 libp2p 数据结构是 `PeerInfo` 结构。
 
-`PeerInfo` 将 `PeerId` 与对等端点正在监听的一组[多地址](https://docs.libp2p.io/reference/glossary/#multiaddr)组合在一起。
+`PeerInfo` 将 `PeerId` 与对等端点正在监听的一组[多地址](#multiaddr)组合在一起。
 
 libp2p 应用程序通常会保留一个“对等端点仓库”或“对等端点帐薄”，为他们知道的所有对等端点维护一个 `PeerInfo` 对象的集合。
 
@@ -402,7 +401,7 @@ libp2p 应用程序通常会保留一个“对等端点仓库”或“对等端�
 
 例如：`/ip4/127.0.0.1/udp/1234` 对两个协议及其基本寻址信息进行编码。 `/ip4/127.0.0.1` 告诉我们我们想要 IPv4 协议的 `127.0.0.1` 环回地址，`/udp/1234` 告诉我们想要将 UDP 数据包发送到端口 `1234`。
 
-随着我们进一步的组合，事情变得更加有趣。例如，多地址 `/p2p/QmYyQSo1c1Ym7orWxLYvCrM2EmxFTANf8wXmmE7DWjhx5N` 使用 libp2p 的[注册协议 ID](https://github.com/multiformats/multiaddr/blob/master/protocols.csv) `/p2p/` 和我的 IPFS 节点公钥的[多重哈希](https://docs.libp2p.io/reference/glossary/#multihash)来唯一标识我的本地 IPFS 节点。
+随着我们进一步的组合，事情变得更加有趣。例如，多地址 `/p2p/QmYyQSo1c1Ym7orWxLYvCrM2EmxFTANf8wXmmE7DWjhx5N` 使用 libp2p 的[注册协议 ID](https://github.com/multiformats/multiaddr/blob/master/protocols.csv) `/p2p/` 和我的 IPFS 节点公钥的[多重哈希](#Multihash)来唯一标识我的本地 IPFS 节点。
 
 有关对等端点标识与公钥加密的关系的更多信息，请参阅[对等端点标识](#对等端点标识)。
 
@@ -449,7 +448,7 @@ libp2p 的一些最有用的内置协议是协作协议，利用网络中的其�
 协作系统天生就容易受到不良行为者的滥用，尽管我们正在研究限制此类攻击影响的方法，但它们在今天的 libp2p 中是可能的。
 
 ### Kad-DHT
-Kad-DHT 协议是一个[分布式哈希表](https://docs.libp2p.io/concepts/reference/glossary/#dht)，为所有参与者提供一个共享的键/值存储系统。除了键/值查找之外，DHT 是 libp2p 的[对等路由](#对等端点路由)和[内容路由](#内容路由)接口的默认实现，因此在发现 网络上的其他对等端点和服务方面 发挥着重要作用。
+Kad-DHT 协议是一个[分布式哈希表](#DHT)，为所有参与者提供一个共享的键/值存储系统。除了键/值查找之外，DHT 是 libp2p 的[对等路由](#对等端点路由)和[内容路由](#内容路由)接口的默认实现，因此在发现 网络上的其他对等端点和服务方面 发挥着重要作用。
 
 #### 女巫攻击【Sybil Attacks】
 DHT 和 p2p 系统通常容易受到称为[女巫攻击](https://en.wikipedia.org/wiki/Sybil_attack)的一类攻击，在这种攻击中，攻击者启动大量具有不同身份的 DHT 对等端点（通常称为“女巫”）以淹没网络并获得优势地位。
@@ -495,7 +494,7 @@ libp2p 的[发布/订阅](#Pubsub)协议允许对等端点向给定“主题”�
 * 高效：网络不会被过多的消息副本淹没。
 * 高可用：对等端点加入和离开网络时不会中断网络。没有中心故障点。
 * 大规模：主题可以拥有大量的订阅者并处理大量的消息。
-* 简单：该系统易于理解和实施。每个对等点只需要记住少量的状态。
+* 简单：该系统易于理解和实施。每个对等端点只需要记住少量的状态。
 
 libp2p 目前使用一种叫做 `gossipsub` 的设计。它的名字来源于这样一个事实：对等端点彼此八卦他们看到了哪些消息，并使用这些信息来维护一个消息传递网络。
 
@@ -512,7 +511,7 @@ libp2p 目前使用一种叫做 `gossipsub` 的设计。它的名字来源于这
 
 例如，在一个 BitTorrent 应用程序中，下载文件的过程中已经使用了上述大多数方法。通过重用 BitTorrent 应用程序正常运行时发现的对等端点，该应用程序也可以建立一个强壮的发布/订阅网络。
 
-询问发现的对等点是否支持发布/订阅协议，如果支持，则将其添加到发布/订阅网络。
+询问发现的对等端点是否支持发布/订阅协议，如果支持，则将其添加到发布/订阅网络。
 
 ### 对等端点类型
 在 `gossipsub` 中，对等端点通过全消息【Full-message】对等连接（*以下简称全消息连接/网络 -译注*）或（仅）元数据【Metadata-only】对等连接（*以下简称元数据连接/网络 -译注*）进行相互连接。整个网络结构由这两个网络组成：
@@ -542,7 +541,7 @@ libp2p 目前使用一种叫做 `gossipsub` 的设计。它的名字来源于这
 ### 嫁接【Grafting】和修剪【Pruning】
 对等连接是双向的，这意味着对于任何两个连接的对等端点，两个对等端点都认为他们是全消息连接，或者是元数据连接。
 
-任一对等端点都可以通过通知另一方来更改连接类型。嫁接是将仅元数据连接转换为全消息的过程。修剪是相反的过程；将全消息连接转换为元数据：
+任一对等端点都可以通过通知另一方来更改连接类型。嫁接是将元数据连接转换为全消息的过程。修剪是相反的过程；将全消息连接转换为元数据：
 
 ![](https://docs.libp2p.io/concepts/publish-subscribe/graft_prune.png)
 
@@ -557,7 +556,7 @@ libp2p 目前使用一种叫做 `gossipsub` 的设计。它的名字来源于这
 在 libp2p 的实现中，每个对等端点每秒执行一系列检查。这些检查称为心跳【Heartbeat】。在此期间进行嫁接和修剪。
 
 ### 订阅和取消订阅
-对等点跟踪其直接连接的对等端点订阅了哪些主题【Topic】。使用此信息，每个对等端点都能够构建一张他们周围的主题订阅图，并且知道哪些对等端点订阅了这些主题：
+对等端点跟踪其直接连接的对等端点订阅了哪些主题【Topic】。使用此信息，每个对等端点都能够构建一张他们周围的主题订阅图，并且知道哪些对等端点订阅了这些主题：
 
 ![](https://docs.libp2p.io/concepts/publish-subscribe/subscriptions_local_view.png)
 
@@ -593,7 +592,7 @@ libp2p 目前使用一种叫做 `gossipsub` 的设计。它的名字来源于这
 
 ![](https://docs.libp2p.io/concepts/publish-subscribe/gossip_deliver.png)
 
-“gossip” 让对等端点有机会注意到 他们有可能丢失的 全消息网络上的消息。如果对等端点注意到它反复丢失消息，那么它可以与拥有消息的对等端点 建立新的全消息连接。
+“gossip” 让对等端点有机会注意到 他们有可能丢失全消息网络上的的消息。如果对等端点注意到它反复丢失消息，那么它可以与拥有消息的对等端点 建立新的全消息连接。
 
 以下是如何通过元数据连接 请求特定消息的示例：
 
@@ -604,7 +603,7 @@ libp2p 目前使用一种叫做 `gossipsub` 的设计。它的名字来源于这
 ### 扇出【Fan-out】
 对等端点可以将消息发布到未订阅的主题。关于如何做到这一点，有一些特殊的规则可以帮助确保可靠地传递这些消息。
 
-当一个对等端点第一次想要向一个它没有订阅的主题发布消息时，它会随机选择 6 个订阅该主题的对等端点（如下所示的 3 个）并将它们记住为该主题的扇出节点：
+当一个对等端点第一次想要向一个它没有订阅的主题发布消息时，它会随机选择 3 个订阅该主题的对等端点（如下所示的 3 个）并将它们记为该主题的扇出节点：
 
 ![](https://docs.libp2p.io/concepts/publish-subscribe/fanout_initial_pick.png)
 
@@ -726,7 +725,7 @@ p2p 网络中的新节点通常通过一组称为“引导节点”的节点与 
 一种由中央“服务器”程序定义的网络架构，这些程序为一组（通常更大的）“客户端”程序提供服务和资源。通常客户端不直接相互通信，而是通过服务器路由所有通信，服务器本质上是网络中最具特权的成员。
 
 ## 分布式哈希表【DHT】<a id='DHT'></a>
-一个分布式哈希表，其内容分布在参与节点的网络中。与进程内哈希表非常相似，值与键相关联并且可以通过键检索。大多数 DHT 以确定性的方式 将一部分可寻址键值空间 分配给节点，这可以高效的路由到给定密钥的节点。
+一个分布式哈希表，其内容分布在参与节点的网络中。与进程内哈希表非常相似，值与键相关联并且可以通过键检索。大多数 DHT 以确定性的方式 将一部分可寻址键值空间 分配给节点，这可以高效的路由到给定路径的节点。
 
 由于 DHT 是许多 p2p 系统的基础，libp2p 提供了一个基于 [Kademlia](https://en.wikipedia.org/wiki/Kademlia)-DHT 的 [Go](https://github.com/libp2p/go-libp2p-kad-dht) 和 [javascript](https://github.com/libp2p/js-libp2p-kad-dht) 实现。(*[rust-kad-dht](https://docs.rs/libp2p/0.44.0/libp2p/kad/index.html) -译注*)
 
@@ -764,7 +763,7 @@ libp2p 连接是允许对等端点读取和写入数据的通信通道。
 
 在 libp2p 中，多重哈希最突出的用途是在 [PeerId](#PeerId) 中，它包含对等端点公钥的哈希。然而，使用 libp2p 构建的系统，尤其是 [IPFS](https://ipfs.io/)，将多重哈希用于其他目的。在 IPFS 的情况下，由于 IPFS 使用 libp2p 并共享相同的 PeerId 约定，因此多重哈希同时用于标识内容和其他对等端点。
 
-在 IPFS 中，多重哈希是 [CID 或内容标识符](https://docs.ipfs.io/concepts/content-addressing/)的关键组成部分，而 CID 的“v0”版本是一段内容的“原始”多重哈希。 “现代” CID 将某些内容的多重哈希与一些紧凑的上下文元数据相结合，允许 IPFS 等内容寻址系统在哈希寻址数据之间创建更有意义的链接。有关 p2p 系统中哈希链接数据结构主题的更多信息，请参阅 [IPLD](https://ipld.io/)。
+在 IPFS 中，多重哈希是 [CID 或内容标识符](https://docs.ipfs.io/concepts/content-addressing/)的关键组成部分，而 CID 的“v0”版本是一段内容的“原始”多重哈希。 “现代” CID 将某些内容的多重哈希与一些紧凑的上下文元数据相结合，允许 IPFS 等内容寻址系统在哈希寻址数据之间创建更有意义的链接。有关 p2p 系统中哈希链接数据结构的更多信息，请参阅 [IPLD](https://ipld.io/)。
 
 多重哈希通常表示为 [base58 编码](https://en.wikipedia.org/wiki/Base58)的字符串，例如 `QmYyQSo1c1Ym7orWxLYvCrM2EmxFTANf8wXmmE7DWjhx5N`。前两个字符 `Qm` 是 SHA-256 哈希算法的多重哈希标头，长度为 256 位，对于所有使用 SHA-256 的 base58 编码的多重哈希都是一样的。
 
@@ -794,7 +793,7 @@ NAT 在实践中的一个不幸影响是，从内网到公网的传出连接 比
 ## NAT穿透【NAT Traversal】
 NAT穿透 是指跨越 [NAT](#NAT) 边界与其他机器建立连接的过程。当跨越 IP 网络之间的边界时（例如，从本地网络到全球互联网），会发生[网络地址转换](#NAT)过程，该过程将地址从一个空间映射到另一个空间。
 
-例如，我的家庭网络有一个内网 IP 地址范围 (10.0.1.x)，这是为专用网络保留的地址范围中的一部分。如果在我的计算机上启动一个程序来监听其内网地址上的连接，那么来自公网的用户将无法联系到我，即使他们知道我的公网 IP 地址。这是因为我还没有让我的路由器知道我的程序。当从 Internet 连接到我的公共 IP 地址时，路由器需要确定将请求 路由到哪个内网 IP 以及哪个端口。
+例如，我的家庭网络有一个内网 IP 地址范围 (10.0.1.x)，这是为专用网络保留的地址范围中的一部分。如果在我的计算机上启动一个程序来监听其内网地址上的连接，那么来自公网的用户将无法联系到我，即使他们知道我的公网 IP 地址。这是因为我还没有让我的路由器知道我的程序。当从 Internet 连接到我的公网 IP 地址时，路由器需要确定将请求 路由到哪个内网 IP 以及哪个端口。
 
 有很多方法可以通知路由器您要公开的服务。对于用户路由器，可能有一个管理界面可以为任意范围的 TCP 或 UDP 端口设置映射。在许多情况下，路由器将允许使用 libp2p 支持的名为 [upnp](https://en.wikipedia.org/wiki/Universal_Plug_and_Play) 的协议自动注册端口。如果启用，libp2p 将尝试向路由器注册您的服务以进行自动 NAT穿透。
 
@@ -875,7 +874,7 @@ TODO：区分各种类型的“流”。可以参考
 * node.js streams/pull-streams
 
 ## Swarm<a id='Swarm'></a>
-可以指相互不如的对等端点的集合。
+可以指相互连接的对等端点的集合。
 
 在 libp2p 代码库中，“swarm”可以是指允许节点与节点交互的模块，尽管该组件后来被重命名为“[switch](#Switch)”。
 
